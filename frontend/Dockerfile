@@ -1,4 +1,4 @@
-# Étape 1 : construction de l'app React
+# Étape 1 : Build de l'app React
 FROM node:20 AS build
 
 WORKDIR /app
@@ -7,12 +7,11 @@ RUN npm install
 COPY . .
 RUN npm run build
 
-# Étape 2 : servir l'app avec un serveur statique
+# Étape 2 : Serveur de production
 FROM node:20
-
 RUN npm install -g serve
-WORKDIR /app
 
+WORKDIR /app
 COPY --from=build /app/build ./build
 
 EXPOSE 3000

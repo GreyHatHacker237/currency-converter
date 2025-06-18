@@ -1,20 +1,35 @@
+const BASE_URL = process.env.REACT_APP_API_URL || "http://backend:8000";
+
 export const convertCurrency = async ({ amount, from_currency, to_currency }) => {
-  const rates = {
-    EUR: { USD: 1.08, XAF: 655.96, GBP: 0.85 },
-    USD: { EUR: 0.93, XAF: 603.38, GBP: 0.79 },
-    XAF: { EUR: 0.0015, USD: 0.0017, GBP: 0.0013 },
-    GBP: { EUR: 1.17, USD: 1.26, XAF: 777.70 }
-  };
+  try {
+    const response = await fetch(`${BASE_URL}/convert/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ amount, from_currency, to_currency })
+    });
 
-  const rate = rates[from_currency]?.[to_currency] || 1;
-  const result = parseFloat(amount) * rate;
+    if (!response.ok) {
+      throw new Error("Erreur lors de la conversion");
+    }
 
-  return {
-    from_currency,
-    to_currency,
-    amount: parseFloat(amount),
-    rate,
-    result,
-    date: new Date().toISOString()
-  };
+    return await response.json();
+  } catch (error) {
+    console.error("Erreur convertCurrency:", error);
+    throw error;
+  }
+};
+
+export const getConversionHistory = async () => {
+  try {
+    const response = await fetch(`${BASE_URL}/history/`);
+    if (!response.ok) {
+      throw new Error("Erreur lors de la récupération de l'historique");
+    }
+    return await response.json();
+  } catch (error) {
+    console.error("Erreur getConversionHistory:", error);
+    return [];
+  }
 };

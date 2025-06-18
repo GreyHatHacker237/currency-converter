@@ -1,35 +1,40 @@
-version: '3.9'
-
 services:
-  db:
-    image: postgres:14
-    environment:
-      POSTGRES_DB: currency_db
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: pass
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-
-  web:
+  backend:
     build: ./backend
-    command: gunicorn backend.wsgi:application --bind 0.0.0.0:8000
+    container_name: currency-backend
+    command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - ./backend:/app
     ports:
       - "8000:8000"
     depends_on:
       - db
+    environment:
+      - DEBUG=True
+      - DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1
 
   frontend:
     build: ./frontend
-    ports:
-      - "3000:3000"
+    container_name: currency-frontend
+    command: serve -s build -l 3000
     volumes:
       - ./frontend:/app
-    depends_on:
-      - web
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+
+  db:
+    image: postgres:15
+    container_name: currency-db
+    environment:
+      POSTGRES_DB: currency_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
 
 volumes:
-  pgdata:
+  postgres_data:
